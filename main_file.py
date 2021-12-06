@@ -11,19 +11,24 @@ import re
 client_id = "DfxlWzN1yptRVeE4qBuN"
 client_secret = "McpQuTrwqV"
 
-start = '&start=1' #1페이지부터 시작.
+# 크롤링 개수 조정
+serach_count = 1000
+
+start = ''
 display = '&display=100' #100개 검색.
 params={}
 encText = urllib.parse.quote("영화")#검색하고자 하는 키워드
+sort = '&date'
 
 response = []
 rescode =[]
 
-for i in range(0,10): #i 의 범위 조정하면 더 많이 크롤링 가능. 현재 1페이지~1001페이지 까지 크롤링.
+for i in range(0,serach_count): #i 의 범위 조정하면 더 많이 크롤링 가능. 현재 1페이지~1001페이지 까지 크롤링.
 
-    start='&start=%d' %(i*100+1)
+    #1페이지부터 시작.
+    start='&start=%d'%(i+1)
 
-    url = "https://openapi.naver.com/v1/search/blog?query=" + encText + start + display  # json 결과
+    url = "https://openapi.naver.com/v1/search/blog?query=" + encText + start + display + sort  # json 결과
     # url = "https://openapi.naver.com/v1/search/blog.xml?query=" + encText # xml 결과
 
     request = urllib.request.Request(url)#url의 정보를 가져와 request 클래스에 담음.
@@ -33,12 +38,8 @@ for i in range(0,10): #i 의 범위 조정하면 더 많이 크롤링 가능. �
 
     response.append(urllib.request.urlopen(request))#http.client.httpresponse 객체를 리턴
 
-    print(response)
-
-
     rescode.append(response[i].getcode())#http status code 리턴
-
-    print(rescode)
+    print(i)
 
 #1. 내용 전체 출력
 '''
@@ -50,12 +51,12 @@ for j in range(0,10):
         print(response_body.decode('utf-8'))#utf-8형식으로 디코딩하여 출력
     else:
         print("Error Code:" + rescode[j])#에러 발생시 에러코드 출력
-  '''
+'''
 print("2.제목만 출력 ---------------------------------------")
 
 resultList=[] #이녀석이 최종 제목 스트링들이 담길 리스트입니다. 자료형 : string list
 
-for j in range(0,10):
+for j in range(0,serach_count):
     if(rescode[j]==200):#200 정상호출
         response_body = response[j].read()
         text_data=response_body.decode('utf-8')
@@ -67,8 +68,14 @@ for j in range(0,10):
         resultList.append(result)
 
 
+# file output
+f= open("movie_list.md", "w", encoding="UTF-8")
+
 print(resultList)
+for movie in resultList:
+    data = movie+"\n"
+    f.write(data)
+
+f.close()
+
 print(len(resultList))
-file=open("list.md",'w',encoding='UTF-8')
-file.write(''.join(resultList))
-file.close()
