@@ -19,9 +19,9 @@ spark = SparkSession.builder \
     .appName("spark") \
     .getOrCreate()
 
-list = spark.read.option("header", "true").csv("./movielist.csv") # 영화 목록 csv를 불러온다.
+list = spark.read.option("header", "true").csv("./data/movielist.csv") # 영화 목록 csv를 불러온다.
 list.show(list.count())
-naverCount = spark.read.option("header", "true").csv("./naver_count.csv") # 크롤링의 결과를 카운트한 csv를 불러온다.
+naverCount = spark.read.option("header", "true").csv("./data/naver_count.csv") # 크롤링의 결과를 카운트한 csv를 불러온다.
 naverCount.show(naverCount.count())
 rdd = list.join(naverCount, list["Title"] == naverCount["Name"],"inner").drop("Name").rdd #두개의 dataframe을 합치고 rdd로 만든다.
 df = sqlContext.createDataFrame(rdd, ['Title', 'Genre','Director','Count']) # rdd를 dataframe으로 만든다.
